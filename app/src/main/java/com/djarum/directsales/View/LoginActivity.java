@@ -91,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         Intent home = new Intent(LoginActivity.this, HomeActivity.class);
                                         startActivity(home);
+                                        finish();
                                     }
                                 });
                             }
