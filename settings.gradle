@@ -1,0 +1,5 @@
+include ':app', ':tess-two-test', ':tess-two', ':eyes-two'
+rootProject.name='DirectSales'
+project(':tess-two-test').projectDir = new File('tess/tess-two-test')
+project(':tess-two').projectDir = new File('tess/tess-two')
+project(':eyes-two').projectDir = new File('tess/eyes-two')

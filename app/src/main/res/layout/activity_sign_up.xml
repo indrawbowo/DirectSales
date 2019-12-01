@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<!--    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--        xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--        xmlns:tools="http://schemas.android.com/tools"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:background="#87ceeb"-->
+<!--        android:paddingLeft="16dp"-->
+<!--        android:paddingTop="16dp"-->
+<!--        android:paddingRight="16dp"-->
+<!--        android:paddingBottom="16dp">-->
+
+
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical">-->
+
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="35dp"-->
+<!--                android:text="Sign Up"-->
+<!--                android:textColor="#000"-->
+<!--                android:textSize="18dp"-->
+<!--                android:textStyle="bold" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/txtUsername"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="30dp"-->
+<!--                android:hint="Username"-->
+<!--                android:imeOptions="actionNext"-->
+<!--                android:inputType="text"-->
+<!--                android:maxLines="1" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/txtFullName"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="Nama Lengkap"-->
+<!--                android:imeOptions="actionNext"-->
+<!--                android:inputType="text"-->
+<!--                android:maxLines="1" />-->
+
+<!--            <RadioGroup-->
+<!--                android:id="@+id/rgGender"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rbLakilaki"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:text="Laki-Laki" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rbPerempuan"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:text="Perempuan" />-->
+<!--            </RadioGroup>-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/txtEmail"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="Email"-->
+<!--                android:imeOptions="actionNext"-->
+<!--                android:inputType="textEmailAddress"-->
+<!--                android:maxLines="1" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/txtDomisili"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="Domisili"-->
+<!--                android:imeOptions="actionNext"-->
+<!--                android:inputType="text"-->
+<!--                android:maxLines="1" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/txtAddress"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="100dp"-->
+<!--                android:hint="Alamat"-->
+<!--                android:inputType="textMultiLine" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/txtPassword"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="Password"-->
+<!--                android:imeOptions="actionNext"-->
+<!--                android:inputType="textPassword"-->
+<!--                android:maxLines="1" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/txtConfirmPassword"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="Confirm Password"-->
+<!--                android:inputType="textPassword" />-->
+
+<!--            <CheckBox-->
+<!--                android:id="@+id/cbTerms"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="I agree to the terms and conditions." />-->
+
+<!--            <Button-->
+<!--                android:id="@+id/btnRegister"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Register" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/txtLogin"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="10dp"-->
+<!--                android:fontFamily="@font/gotham"-->
+<!--                android:text="Already got an account? Click here to Sign In"-->
+<!--                android:textColor="#696969"-->
+<!--                android:textSize="14dp" />-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/bmpLogo"-->
+<!--                android:layout_width="250dp"-->
+<!--                android:layout_height="70dp"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:layout_marginTop="27dp"-->
+<!--                android:src="@drawable/logo" />-->
+
+<!--        </LinearLayout>-->
+
+
+<!--    </RelativeLayout>-->
+</ScrollView>

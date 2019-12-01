@@ -1,0 +1,28 @@
+{
+  "User": {
+    "1": {
+      "Username": "admin",
+      "Password": "admin",
+      "Domisili": "Jakarta Barat",
+      "Gender": "Male",
+      "Alamat": "KP. Krendang Baru",
+      "RT/RW": "002/002",
+      "Kelurahan": "Duri Utara",
+      "Kecamatan": "Tambora",
+      "Email": "indrawbowo@gmail.com"
+    },
+    "2": {
+      "Username": "user",
+      "Password": "user",
+      "Domisili": "Jakarta Barat",
+      "Gender": "Male",
+      "Alamat": "KP. Krendang Baru",
+      "RT/RW": "002/002",
+      "Kelurahan": "Duri Utara",
+      "Kecamatan": "Tambora",
+      "Email": "iindrawwbowo@gmail.com"
+    }
+  }
+}
+Copy
+Support ObjGenAccess Beta VersionCopyright © 2019 Everett Ward Systems   

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "945890247247",
+    "firebase_url": "https://directsales-eefbd.firebaseio.com",
+    "project_id": "directsales-eefbd",
+    "storage_bucket": "directsales-eefbd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:945890247247:android:de2e1e126481ac19fe603a",
+        "android_client_info": {
+          "package_name": "com.djarum.directsales"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "945890247247-7lllt332grfonof5v29ld3c8c3fj6brj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.djarum.directsales",
+            "certificate_hash": "3c2aef2459f9a2558e70d9d43967703a55281707"
+          }
+        },
+        {
+          "client_id": "945890247247-g495uhte31oneat3huap2urf2nqhccmv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuiYtv0zM_vrPCaI06f3fRsNqf3-DUtG8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "945890247247-g495uhte31oneat3huap2urf2nqhccmv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
