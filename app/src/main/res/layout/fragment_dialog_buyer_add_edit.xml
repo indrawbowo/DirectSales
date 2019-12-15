@@ -4,12 +4,10 @@
     android:layout_height="match_parent">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/root_layout_add_buyer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/dialog_bg"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
         android:paddingRight="16dp"
@@ -24,26 +22,25 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
+                android:orientation="horizontal">
 
                 <EditText
                     android:id="@+id/txtFullNameAddEdit"
-                    android:layout_marginTop="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Nama Lengkap"
+                    android:layout_marginTop="8dp"
                     android:layout_weight="1"
+                    android:hint="Nama Lengkap"
                     android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1" />
+
                 <ImageButton
                     android:id="@+id/btn_scan_name_add_edit"
-                    android:layout_marginTop="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ic_scan"
-                    />
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/ic_scan" />
             </LinearLayout>
 
             <RadioGroup
@@ -79,32 +76,30 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
+                android:orientation="horizontal">
 
                 <EditText
                     android:id="@+id/txtDomisiliAddEdit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:hint="Domisili"
                     android:imeOptions="actionNext"
                     android:inputType="text"
-                    android:layout_weight="1"
                     android:maxLines="1" />
+
                 <ImageButton
                     android:id="@+id/btn_scan_domisili_add_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ic_scan"
-                    />
+                    android:background="@drawable/ic_scan" />
             </LinearLayout>
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
+                android:orientation="horizontal">
 
                 <EditText
                     android:id="@+id/txtAddressAddEdit"
@@ -113,13 +108,13 @@
                     android:layout_weight="1"
                     android:hint="Alamat"
                     android:inputType="textMultiLine" />
+
                 <ImageButton
                     android:id="@+id/btn_scan_address_add_edit"
-                    android:layout_marginTop="32dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ic_scan"
-                    />
+                    android:layout_marginTop="32dp"
+                    android:background="@drawable/ic_scan" />
             </LinearLayout>
 
             <EditText
@@ -140,16 +135,17 @@
                 android:inputType="textMultiLine" />
 
             <Button
+                android:id="@+id/btnChoosePhotoAddEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choose Photo" />
+
+            <Button
                 android:id="@+id/btnAddAddEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Edit" />
 
-            <Button
-                android:id="@+id/btnChoosePhotoAddEdit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Choose Photo" />
 
         </LinearLayout>
 

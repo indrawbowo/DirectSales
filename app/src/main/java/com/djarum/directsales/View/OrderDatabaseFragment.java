@@ -69,19 +69,14 @@ public class OrderDatabaseFragment extends Fragment {
     }
 
     private void load() {
+
         FirebaseRecyclerOptions<Order> options = new FirebaseRecyclerOptions.Builder<Order>().setQuery(order, Order.class).build();
-        FirebaseRecyclerAdapter<Order, OrderViewHolder> adapter = new FirebaseRecyclerAdapter<Order, OrderViewHolder>(options) {
+        final FirebaseRecyclerAdapter<Order, OrderViewHolder> adapter = new FirebaseRecyclerAdapter<Order, OrderViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull OrderViewHolder holder, int position, @NonNull final Order model) {
+            protected void onBindViewHolder(@NonNull final OrderViewHolder holder, int position, @NonNull final Order model) {
                 holder.txtOrderId.setText("Order #" + model.getOrderId());
                 holder.txtOrderAddress.setText(model.getAddress());
                 holder.txtOrderBuyerName.setText(model.getBuyerName());
-                if (model.getDelivered()) {
-                    holder.layout.setBackgroundColor(Color.parseColor("#008F11"));
-                } else if (model.getCancelled()) {
-                    holder.layout.setBackgroundColor(Color.parseColor("#ff0000"));
-                }
-
                 holder.btnDeliver.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -92,7 +87,13 @@ public class OrderDatabaseFragment extends Fragment {
                                     for (DataSnapshot datas : dataSnapshot.getChildren()) {
                                         String key = datas.getKey();
                                         Order orderItem = datas.getValue(Order.class);
-                                        order.child(key).child("delivered").setValue(!orderItem.getDelivered());
+                                        Boolean isDelivered = !orderItem.getDelivered();
+                                        order.child(key).child("delivered").setValue(isDelivered);
+                                        if (!isDelivered) {
+                                            holder.layout.setBackgroundColor(Color.parseColor("#ff303030"));
+                                        } else {
+                                            holder.layout.setBackgroundColor(Color.parseColor("#008F11"));
+                                        }
                                     }
                                 }
                             }
@@ -117,6 +118,11 @@ public class OrderDatabaseFragment extends Fragment {
                                         String key = datas.getKey();
                                         Order orderItem = datas.getValue(Order.class);
                                         order.child(key).child("cancelled").setValue(!orderItem.getCancelled());
+                                        if (!orderItem.getCancelled()) {
+                                            holder.layout.setBackgroundColor(Color.parseColor("#ff303030"));
+                                        } else {
+                                            holder.layout.setBackgroundColor(Color.parseColor("#ff0000"));
+                                        }
                                     }
                                 }
                             }
@@ -134,6 +140,11 @@ public class OrderDatabaseFragment extends Fragment {
                         Toast.makeText(getActivity(), "order database", Toast.LENGTH_SHORT).show();
                     }
                 });
+//                if (model.getDelivered()) {
+//                    holder.layout.setBackgroundColor(Color.parseColor("#008F11"));
+//                } else if (model.getCancelled()) {
+//                    holder.layout.setBackgroundColor(Color.parseColor("#ff0000"));
+//                }
             }
 
             @NonNull

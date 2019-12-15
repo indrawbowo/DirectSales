@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -59,14 +60,15 @@ public class AddNewBuyerFragment extends Fragment {
     private RadioButton rbLakilaki, rbPerempuan;
     private RadioGroup rgGender;
     private ImageButton btnScanNama, btnScanDomisili, btnScanAddress;
+    private ImageView ivPhoto;
     private Button btnAdd, btnChoosePhoto;
     private ProgressDialog mProgressDialog;
     private TesseractOCR mTessOCR;
+    private Uri uri;
     Buyer buyer;
     StorageReference storageRef;
     FirebaseDatabase database;
     DatabaseReference table_buyer;
-    String photoUrl;
 
     public AddNewBuyerFragment() {
 
@@ -108,6 +110,7 @@ public class AddNewBuyerFragment extends Fragment {
         btnScanNama = (ImageButton) view.findViewById(R.id.btn_scan_name);
         btnScanAddress = (ImageButton) view.findViewById(R.id.btn_scan_address);
         btnScanDomisili = (ImageButton) view.findViewById(R.id.btn_scan_domisili);
+        ivPhoto = (ImageView) view.findViewById(R.id.ivPhoto);
         clearField();
         init();
     }
@@ -279,7 +282,7 @@ public class AddNewBuyerFragment extends Fragment {
                 } else {
                     mDialog.dismiss();
                     buyer.setAlamat(txtAddress.getText().toString());
-                    buyer.setDomisili(txtDomisili.getText().toString());
+                    buyer.setDomisili(txtDomisili.getText().toString().toUpperCase());
                     buyer.setEmail(txtEmail.getText().toString());
                     buyer.setNama(txtFullName.getText().toString());
                     buyer.setPhoneNumber(txtPhone.getText().toString());
@@ -291,12 +294,12 @@ public class AddNewBuyerFragment extends Fragment {
                     if(!txtNotes.getText().toString().isEmpty()){
                         buyer.setNotes(txtNotes.getText().toString());
                     }
-                    table_buyer.push().setValue(buyer);
-                    Toast.makeText(getActivity(), "Add success", Toast.LENGTH_SHORT).show();
-                    table_buyer.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    table_buyer.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot newDataSnapshot) {
                             buyer.setBuyerId(String.valueOf(newDataSnapshot.getChildrenCount() + 1));
+
                         }
 
                         @Override
@@ -304,6 +307,9 @@ public class AddNewBuyerFragment extends Fragment {
 
                         }
                     });
+                    buyer.setPhotoURL(doUpload(uri, buyer.getBuyerId()));
+                    Toast.makeText(getActivity(), "Add success", Toast.LENGTH_SHORT).show();
+
                     clearField();
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage("Apakah anda ingin melakukan order?").setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -316,7 +322,6 @@ public class AddNewBuyerFragment extends Fragment {
                             FragmentTransaction transaction = getFragmentManager().beginTransaction();
                             transaction.add(R.id.rootLayout, productListFragment).commit();
                             transaction.addToBackStack(BuyerListFragment.class.getSimpleName());
-                            getFragmentManager().popBackStack();
                         }
                     }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                         @Override
@@ -393,13 +398,17 @@ public class AddNewBuyerFragment extends Fragment {
             }
         } else {
             if (resultCode == Activity.RESULT_OK) {
-                Uri uri = data.getParcelableExtra("path");
-                doUpload(uri, buyer.getBuyerId());
+                uri = data.getParcelableExtra("path");
+                ivPhoto.setImageURI(uri);
+
+//                doUpload(uri, buyer.getBuyerId());
             }
         }
     }
 
-    private void doUpload(final Uri uris, String id) {
+    private String doUpload(final Uri uris, String id) {
+        final String[] photoUrl = new String[1];
+
         if (mProgressDialog == null) {
             mProgressDialog = ProgressDialog.show(getActivity(), "Processing",
                     "Doing Upload...", true);
@@ -422,8 +431,10 @@ public class AddNewBuyerFragment extends Fragment {
                                 storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {
-                                        photoUrl = uri.toString();
-                                        table_buyer.child(key).child("photoURL").setValue(photoUrl);
+                                        photoUrl[0] = uri.toString();
+                                        buyer.setPhotoURL(photoUrl[0]);
+                                        table_buyer.push().setValue(buyer);
+
                                     }
                                 });
                             }
@@ -446,6 +457,7 @@ public class AddNewBuyerFragment extends Fragment {
             }
         });
         mProgressDialog.dismiss();
+        return photoUrl[0];
     }
 
     private void showSettingsDialog() {
