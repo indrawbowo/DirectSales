@@ -36,33 +36,8 @@ public class DialogOrderFragment extends DialogFragment {
     private final static String ARGS_PRODUCT = "PRODUCT";
     private Context context;
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        if(getArguments()!=null) {
-            buyer = getArguments().getParcelable(ARGS_BUYER);
-            product = getArguments().getParcelable(ARGS_PRODUCT);
-        }
-        View view = inflater.inflate(R.layout.dialog_order,null);
-
-        builder.setView(view).setTitle("Masukkan jumlah").setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-
-            }
-        }).setPositiveButton("ORDER", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                doAddOrder();
-                dialog.dismiss();
-            }
-        });
-        txtJumlah = (EditText) view.findViewById(R.id.txtJumlah);
-
-        return builder.create();
+    public static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
     }
 
     private void doAddOrder() {
@@ -107,5 +82,39 @@ public class DialogOrderFragment extends DialogFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         this.context = context;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        if (getArguments() != null) {
+            buyer = getArguments().getParcelable(ARGS_BUYER);
+            product = getArguments().getParcelable(ARGS_PRODUCT);
+        }
+        View view = inflater.inflate(R.layout.dialog_order, null);
+        txtJumlah = (EditText) view.findViewById(R.id.txtJumlah);
+
+
+        builder.setView(view).setTitle("Masukkan jumlah").setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+
+            }
+        }).setPositiveButton("ORDER", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (isNumeric(txtJumlah.getText().toString())) {
+                    doAddOrder();
+                } else {
+                    Toast.makeText(context, "Data Invalid", Toast.LENGTH_SHORT).show();
+                }
+                dialog.dismiss();
+            }
+        });
+
+        return builder.create();
     }
 }

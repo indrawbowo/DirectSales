@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -17,8 +18,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,7 +47,9 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -57,7 +62,8 @@ public class DialogBuyerAddEditFragment extends DialogFragment {
     private RadioButton rbLakilaki, rbPerempuan;
     private RadioGroup rgGender;
     private ImageButton btnScanNama, btnScanDomisili, btnScanAddress;
-    private Button btnAdd;
+    private ImageView ivPhotoAddEdit;
+    private Button btnAddProduct, btnChoosePhoto;
     private TesseractOCR mTessOCR;
 
     public static final int REQUEST_IMAGE = 100;
@@ -72,10 +78,10 @@ public class DialogBuyerAddEditFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Button btnAddProduct = (Button) view.findViewById(R.id.btnAddAddEdit);
-        Button btnChoosePhoto = (Button) view.findViewById(R.id.btnChoosePhotoAddEdit);
         buyer = FirebaseDatabase.getInstance().getReference().child("Buyer");
 
+        btnAddProduct = (Button) view.findViewById(R.id.btnEditBuyer);
+        btnChoosePhoto = (Button) view.findViewById(R.id.btnChoosePhotoAddEdit);
         txtFullName = (EditText) view.findViewById(R.id.txtFullNameAddEdit);
         txtEmail = (EditText) view.findViewById(R.id.txtEmailAddEdit);
         txtDomisili = (EditText) view.findViewById(R.id.txtDomisiliAddEdit);
@@ -85,14 +91,14 @@ public class DialogBuyerAddEditFragment extends DialogFragment {
         rbLakilaki = (RadioButton) view.findViewById(R.id.rbLakilakiAddEdit);
         rbPerempuan = (RadioButton) view.findViewById(R.id.rbPerempuanAddEdit);
         rgGender = (RadioGroup) view.findViewById(R.id.rgGenderAddEdit);
-        btnAdd = (Button) view.findViewById(R.id.btnAddAddEdit);
         btnScanNama = (ImageButton) view.findViewById(R.id.btn_scan_name_add_edit);
         btnScanAddress = (ImageButton) view.findViewById(R.id.btn_scan_address_add_edit);
         btnScanDomisili = (ImageButton) view.findViewById(R.id.btn_scan_domisili_add_edit);
+        ivPhotoAddEdit = (ImageView) view.findViewById(R.id.ivPhotoAddEdit);
 
         if (getArguments() != null) {
             selectedBuyer = (Buyer) getArguments().getParcelable(ARGS_BUYER_DATABASE);
-//            btnAddProduct.setText("EDIT");
+            setData();
         }
         storageRef = FirebaseStorage.getInstance().getReference();
 
@@ -190,25 +196,7 @@ public class DialogBuyerAddEditFragment extends DialogFragment {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot datas : dataSnapshot.getChildren()) {
                                 String key = datas.getKey();
-                                String alamat = txtAddress.getText().toString();
-                                String domisili = txtDomisili.getText().toString();
-                                String email = txtEmail.getText().toString();
-                                String nama = txtFullName.getText().toString();
-                                String notes = txtNotes.getText().toString();
-                                String phoneNumber = txtPhone.getText().toString();
-                                if (rbLakilaki.isChecked()) {
-                                    buyer.child(key).child("gender").setValue("Laki-Laki");
-                                } else if (rbPerempuan.isChecked()) {
-                                    buyer.child(key).child("gender").setValue("Perempuan");
-                                }
-                                buyer.child(key).child("alamat").setValue(alamat);
-                                buyer.child(key).child("domisili").setValue(domisili);
-                                buyer.child(key).child("email").setValue(email);
-                                buyer.child(key).child("gender").setValue(alamat);
-                                buyer.child(key).child("nama").setValue(nama);
-                                buyer.child(key).child("notes").setValue(notes);
-                                buyer.child(key).child("phoneNumber").setValue(phoneNumber);
-
+                                doUpload(selectedBuyer.getBuyerId(), key);
                             }
                         }
                     }
@@ -222,6 +210,22 @@ public class DialogBuyerAddEditFragment extends DialogFragment {
                 });
             }
         });
+    }
+
+    private void setData() {
+        txtFullName.setText(selectedBuyer.getNama());
+        txtEmail.setText(selectedBuyer.getEmail());
+        txtAddress.setText(selectedBuyer.getAlamat());
+        txtDomisili.setText(selectedBuyer.getDomisili());
+        txtNotes.setText(selectedBuyer.getNotes());
+        txtPhone.setText(selectedBuyer.getPhoneNumber());
+        if (selectedBuyer.getGender().equals("Perempuan")) {
+            rbPerempuan.setChecked(true);
+        } else if (selectedBuyer.getGender().equals("Laki-Laki")) {
+            rbLakilaki.setChecked(true);
+        }
+        Picasso.get().load(selectedBuyer.getPhotoURL()).into(ivPhotoAddEdit);
+
     }
 
 
@@ -240,50 +244,48 @@ public class DialogBuyerAddEditFragment extends DialogFragment {
     }
 
 
-    private void doUpload(final Uri uris, String id) {
+    private void doUpload(String id, final String key) {
         if (mProgressDialog == null) {
             mProgressDialog = ProgressDialog.show(getActivity(), "Processing",
                     "Doing Upload...", true);
         } else {
             mProgressDialog.show();
         }
-
         final StorageReference storageReference = storageRef.child("buyer/images/" + id + ".jpg");
+        ivPhotoAddEdit.setDrawingCacheEnabled(true);
+        ivPhotoAddEdit.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable) ivPhotoAddEdit.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-        storageReference.putFile(uris).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        UploadTask uploadTask = storageReference.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Toast.makeText(getActivity(), "Upload Failed", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                buyer.orderByChild("buyerId").equalTo(selectedBuyer.getBuyerId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot datas : dataSnapshot.getChildren()) {
-                                final String key = datas.getKey();
-                                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        photoUrl = uri.toString();
-                                        buyer.child(key).child("photoURL").setValue(photoUrl);
-                                    }
-                                });
-                            }
+                    public void onSuccess(Uri uri) {
+                        buyer.child(key).child("alamat").setValue(txtAddress.getText().toString());
+                        buyer.child(key).child("domisili").setValue(txtDomisili.getText().toString().toUpperCase());
+                        buyer.child(key).child("email").setValue(txtEmail.getText().toString());
+                        if (rbLakilaki.isChecked()) {
+                            buyer.child(key).child("gender").setValue("Laki-Laki");
+                        } else if (rbPerempuan.isChecked()) {
+                            buyer.child(key).child("gender").setValue("Perempuan");
                         }
+                        buyer.child(key).child("nama").setValue(txtFullName.getText().toString());
+                        buyer.child(key).child("notes").setValue(txtNotes.getText().toString());
+                        buyer.child(key).child("phoneNumber").setValue(txtPhone.getText().toString());
+                        buyer.child(key).child("photoURL").setValue(uri.toString());
+
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-
-
                 });
-                mProgressDialog.dismiss();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                mProgressDialog.dismiss();
             }
         });
         mProgressDialog.dismiss();
@@ -339,7 +341,8 @@ public class DialogBuyerAddEditFragment extends DialogFragment {
         } else {
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getParcelableExtra("path");
-                doUpload(uri, selectedBuyer.getBuyerId());
+                ivPhotoAddEdit.setImageURI(uri);
+//                doUpload(uri, selectedBuyer.getBuyerId());
             }
         }
     }

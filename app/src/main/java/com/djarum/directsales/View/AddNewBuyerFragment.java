@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -47,6 +48,7 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -291,7 +293,7 @@ public class AddNewBuyerFragment extends Fragment {
                     } else if (rbPerempuan.isChecked()) {
                         buyer.setGender("Perempuan");
                     }
-                    if(!txtNotes.getText().toString().isEmpty()){
+                    if (!txtNotes.getText().toString().isEmpty()) {
                         buyer.setNotes(txtNotes.getText().toString());
                     }
 
@@ -307,7 +309,7 @@ public class AddNewBuyerFragment extends Fragment {
 
                         }
                     });
-                    buyer.setPhotoURL(doUpload(uri, buyer.getBuyerId()));
+                    doUpload(buyer.getBuyerId());
                     Toast.makeText(getActivity(), "Add success", Toast.LENGTH_SHORT).show();
 
                     clearField();
@@ -400,15 +402,11 @@ public class AddNewBuyerFragment extends Fragment {
             if (resultCode == Activity.RESULT_OK) {
                 uri = data.getParcelableExtra("path");
                 ivPhoto.setImageURI(uri);
-
-//                doUpload(uri, buyer.getBuyerId());
             }
         }
     }
 
-    private String doUpload(final Uri uris, String id) {
-        final String[] photoUrl = new String[1];
-
+    private void doUpload(String id) {
         if (mProgressDialog == null) {
             mProgressDialog = ProgressDialog.show(getActivity(), "Processing",
                     "Doing Upload...", true);
@@ -417,47 +415,52 @@ public class AddNewBuyerFragment extends Fragment {
         }
 
         final StorageReference storageReference = storageRef.child("buyer/images/" + id + ".jpg");
+        ivPhoto.setDrawingCacheEnabled(true);
+        ivPhoto.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable) ivPhoto.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-        storageReference.putFile(uris).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        UploadTask uploadTask = storageReference.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Toast.makeText(getActivity(), "Upload Failed", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                table_buyer.orderByChild("buyerId").equalTo(buyer.getBuyerId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot datas : dataSnapshot.getChildren()) {
-                                final String key = datas.getKey();
-                                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        photoUrl[0] = uri.toString();
-                                        buyer.setPhotoURL(photoUrl[0]);
-                                        table_buyer.push().setValue(buyer);
-
-                                    }
-                                });
-                            }
-                        }
+                    public void onSuccess(Uri uri) {
+                        buyer.setPhotoURL(uri.toString());
+                        mProgressDialog.dismiss();
+                        table_buyer.push().setValue(buyer);
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-
-
                 });
-                mProgressDialog.dismiss();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                mProgressDialog.dismiss();
             }
         });
-        mProgressDialog.dismiss();
-        return photoUrl[0];
+
+//        storageReference.putFile(uris).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//            @Override
+//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                mProgressDialog.dismiss();
+//                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                    @Override
+//                    public void onSuccess(Uri uri) {
+//                        photoUrl[0] = uri.toString();
+//                    }
+//                });
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                Toast.makeText(getActivity(), "Upload Failed", Toast.LENGTH_SHORT).show();
+//                mProgressDialog.dismiss();
+//            }
+//        });
+
     }
 
     private void showSettingsDialog() {

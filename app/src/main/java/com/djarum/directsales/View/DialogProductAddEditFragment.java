@@ -4,6 +4,8 @@ package com.djarum.directsales.View;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +33,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,7 +50,10 @@ public class DialogProductAddEditFragment extends DialogFragment {
     Product selectedProduct;
     DatabaseReference product;
     Boolean isAdd;
-
+    ImageView ivProductAddEdit;
+    EditText txtProductNameAddEdit;
+    EditText txtProductPriceAddEdit;
+    EditText txtProductStockAddEdit;
     public DialogProductAddEditFragment() {
         // Required empty public constructor
     }
@@ -55,9 +65,10 @@ public class DialogProductAddEditFragment extends DialogFragment {
         Button btnChoosePhoto = (Button) view.findViewById(R.id.btnChoosePhoto);
         product = FirebaseDatabase.getInstance().getReference().child("Product");
 
-        final EditText txtProductNameAddEdit = (EditText) view.findViewById(R.id.txtProductNameAddEdit);
-        final EditText txtProductPriceAddEdit = (EditText) view.findViewById(R.id.txtProductPriceAddEdit);
-        final EditText txtProductStockAddEdit = (EditText) view.findViewById(R.id.txtProductStockAddEdit);
+        txtProductNameAddEdit = (EditText) view.findViewById(R.id.txtProductNameAddEdit);
+        txtProductPriceAddEdit = (EditText) view.findViewById(R.id.txtProductPriceAddEdit);
+        txtProductStockAddEdit = (EditText) view.findViewById(R.id.txtProductStockAddEdit);
+        ivProductAddEdit = (ImageView) view.findViewById(R.id.ivProductAddEdit);
         isAdd = getArguments() == null;
 
         if (!isAdd) {
@@ -66,6 +77,7 @@ public class DialogProductAddEditFragment extends DialogFragment {
             txtProductNameAddEdit.setText(selectedProduct.getNama());
             txtProductPriceAddEdit.setText(String.valueOf(selectedProduct.getHarga()));
             txtProductStockAddEdit.setText(String.valueOf(selectedProduct.getStock()));
+            Picasso.get().load(selectedProduct.getPhotoURL()).into(ivProductAddEdit);
         } else {
             selectedProduct = new Product();
             product.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -99,18 +111,13 @@ public class DialogProductAddEditFragment extends DialogFragment {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot datas : dataSnapshot.getChildren()) {
                                 String key = datas.getKey();
-                                String harga = txtProductPriceAddEdit.getText().toString();
-                                String nama = txtProductNameAddEdit.getText().toString();
-                                String stock = txtProductStockAddEdit.getText().toString();
-                                product.child(key).child("harga").setValue(Integer.valueOf(harga));
-                                product.child(key).child("nama").setValue(nama);
-                                product.child(key).child("stock").setValue(Integer.valueOf(stock));
+                                doUpload(selectedProduct.getProductId(), key);
                             }
                         } else {
                             selectedProduct.setNama(txtProductNameAddEdit.getText().toString());
                             selectedProduct.setHarga(Integer.valueOf(txtProductPriceAddEdit.getText().toString()));
                             selectedProduct.setStock(Integer.valueOf(txtProductStockAddEdit.getText().toString()));
-                            product.push().setValue(selectedProduct);
+                            doUpload(selectedProduct.getProductId());
                             if (isAdd) {
                                 product.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
@@ -192,12 +199,13 @@ public class DialogProductAddEditFragment extends DialogFragment {
         if (requestCode == REQUEST_IMAGE) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getParcelableExtra("path");
-                doUpload(uri, selectedProduct.getProductId());
+                ivProductAddEdit.setImageURI(uri);
+//                doUpload(uri, selectedProduct.getProductId());
             }
         }
     }
 
-    private void doUpload(final Uri uris, String id) {
+    private void doUpload(String id, final String key) {
         if (mProgressDialog == null) {
             mProgressDialog = ProgressDialog.show(getActivity(), "Processing",
                     "Doing Upload...", true);
@@ -205,43 +213,69 @@ public class DialogProductAddEditFragment extends DialogFragment {
             mProgressDialog.show();
         }
 
+        final StorageReference storageReference = storageRef.child("buyer/images/" + id + ".jpg");
+        ivProductAddEdit.setDrawingCacheEnabled(true);
+        ivProductAddEdit.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable) ivProductAddEdit.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-        final StorageReference storageReference = storageRef.child("product/images/" + id + ".jpg");
-
-        storageReference.putFile(uris).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        UploadTask uploadTask = storageReference.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Toast.makeText(getActivity(), "Upload Failed", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                product.orderByChild("productId").equalTo(selectedProduct.getProductId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot datas : dataSnapshot.getChildren()) {
-                                final String key = datas.getKey();
-                                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        photoUrl = uri.toString();
-                                        product.child(key).child("photoURL").setValue(photoUrl);
-                                    }
-                                });
-                            }
-                        }
+                    public void onSuccess(Uri uri) {
+                        product.child(key).child("harga").setValue(Integer.valueOf(txtProductPriceAddEdit.getText().toString()));
+                        product.child(key).child("nama").setValue(txtProductNameAddEdit.getText().toString());
+                        product.child(key).child("stock").setValue(Integer.valueOf(txtProductStockAddEdit.getText().toString()));
+                        product.child(key).child("photoURL").setValue(uri.toString());
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-
-
                 });
-                mProgressDialog.dismiss();
             }
-        }).addOnFailureListener(new OnFailureListener() {
+        });
+        mProgressDialog.dismiss();
+    }
+
+    private void doUpload(String id) {
+        if (mProgressDialog == null) {
+            mProgressDialog = ProgressDialog.show(getActivity(), "Processing",
+                    "Doing Upload...", true);
+        } else {
+            mProgressDialog.show();
+        }
+
+        final StorageReference storageReference = storageRef.child("buyer/images/" + id + ".jpg");
+        ivProductAddEdit.setDrawingCacheEnabled(true);
+        ivProductAddEdit.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable) ivProductAddEdit.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = storageReference.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                mProgressDialog.dismiss();
+            public void onFailure(@NonNull Exception exception) {
+                Toast.makeText(getActivity(), "Upload Failed", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        selectedProduct.setPhotoURL(uri.toString());
+                        product.push().setValue(selectedProduct);
+                    }
+                });
             }
         });
         mProgressDialog.dismiss();

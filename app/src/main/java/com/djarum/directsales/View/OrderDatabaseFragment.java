@@ -89,11 +89,11 @@ public class OrderDatabaseFragment extends Fragment {
                                         Order orderItem = datas.getValue(Order.class);
                                         Boolean isDelivered = !orderItem.getDelivered();
                                         order.child(key).child("delivered").setValue(isDelivered);
-                                        if (!isDelivered) {
-                                            holder.layout.setBackgroundColor(Color.parseColor("#ff303030"));
-                                        } else {
-                                            holder.layout.setBackgroundColor(Color.parseColor("#008F11"));
-                                        }
+//                                        if (!isDelivered) {
+//                                            holder.layout.setBackgroundColor(Color.parseColor("#ff303030"));
+//                                        } else {
+//                                            holder.layout.setBackgroundColor(Color.parseColor("#008F11"));
+//                                        }
                                     }
                                 }
                             }
@@ -118,11 +118,11 @@ public class OrderDatabaseFragment extends Fragment {
                                         String key = datas.getKey();
                                         Order orderItem = datas.getValue(Order.class);
                                         order.child(key).child("cancelled").setValue(!orderItem.getCancelled());
-                                        if (!orderItem.getCancelled()) {
-                                            holder.layout.setBackgroundColor(Color.parseColor("#ff303030"));
-                                        } else {
-                                            holder.layout.setBackgroundColor(Color.parseColor("#ff0000"));
-                                        }
+//                                        if (!orderItem.getCancelled()) {
+//                                            holder.layout.setBackgroundColor(Color.parseColor("#ff303030"));
+//                                        } else {
+//                                            holder.layout.setBackgroundColor(Color.parseColor("#ff0000"));
+//                                        }
                                     }
                                 }
                             }
@@ -140,11 +140,19 @@ public class OrderDatabaseFragment extends Fragment {
                         Toast.makeText(getActivity(), "order database", Toast.LENGTH_SHORT).show();
                     }
                 });
-//                if (model.getDelivered()) {
-//                    holder.layout.setBackgroundColor(Color.parseColor("#008F11"));
-//                } else if (model.getCancelled()) {
-//                    holder.layout.setBackgroundColor(Color.parseColor("#ff0000"));
-//                }
+                if (model.getDelivered()) {
+                    holder.layout.setBackgroundColor(Color.parseColor("#008F11"));
+                    holder.btnCancel.setVisibility(View.INVISIBLE);
+                    holder.btnDeliver.setVisibility(View.VISIBLE);
+                } else if (model.getCancelled()) {
+                    holder.layout.setBackgroundColor(Color.parseColor("#ff0000"));
+                    holder.btnDeliver.setVisibility(View.INVISIBLE);
+                    holder.btnCancel.setVisibility(View.VISIBLE);
+                } else if (!model.getCancelled() && !model.getDelivered()) {
+                    holder.layout.setBackgroundColor(Color.parseColor("#ff303030"));
+                    holder.btnCancel.setVisibility(View.VISIBLE);
+                    holder.btnDeliver.setVisibility(View.VISIBLE);
+                }
             }
 
             @NonNull
